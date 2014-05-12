@@ -23,13 +23,7 @@ Tscope.makeLens = function(getter, setter){
   f.set = setter; // l(a, val) = l.set(a,val);
   
   f.mod = function (a, f) { 
-    var _val = getter(a);
-    if (!Array.isArray(_val)){
-      return setter(a, f(_val)); 
-    } 
-    else {
-      return setter(a, _val.map(f));
-    }
+    return setter(a, f(getter(a)));
   };
 
   f.then = function() {

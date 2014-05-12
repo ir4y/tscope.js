@@ -42,6 +42,30 @@ Tscope.makeLens = function(getter, setter){
     });
   }.bind(null, f);
 
+  f.traversed = function(pred){
+    var pred = pred || function(_x){return true};
+    var _l = Tscope.makeLens(
+      function(xs) {
+        return xs.filter(pred).map(function(x){return getter(x)});
+      },
+      function(xs, vals) {
+        var defval = xs.map(function(x){return getter(x)});
+        var index = -1;
+        return xs.map(function(x, i){
+          if (pred(x)){
+            index =  index + 1;
+            if (!Array.isArray(vals)){
+              return setter(x, vals);
+            } else {
+              return setter(x, vals[index]);
+            }
+          } else {
+            return setter(x, defval[i]);
+          }
+        });
+      });
+    return _l;
+  }
   return f;
 };
 
@@ -93,21 +117,7 @@ Tscope.attr = function(name) {
 };
 
 Tscope.traversed = function(lens){
-  var _l = Tscope.makeLens(
-    function(xs) {
-      return xs.map(function(x){return lens(x)});
-    },
-    function(xs, vals) {
-      if (!Array.isArray(vals)){
-        return xs.map(function(x){return lens(x, vals)});
-      }
-      else {
-        return xs.map(function(x,i){return lens(x, vals[i])});
-      }
-    }
-  );
-
-  return _l;
+  return lens.traversed();
 }
 
 Tscope.full = Tscope.makeLens(

@@ -104,6 +104,26 @@ describe('Tscope', function(){
     });
   });
 
+  describe('Traversal filter', function() {
+    var data = {array: [{x: 1, y:2}, {x: 2, y: 2}, {x: 4, y: 3}]};
+    var traverse = Tscope.attr('array').then(Tscope.attr('x').traversed(function(point){return point.x > point.y}));
+
+    it('get filtered traversed x', function() {
+      assert.deepEqual(traverse(data), [4]);
+    });
+
+    it('set filtered traversed x', function() {
+      assert.deepEqual(traverse(data,-1), {array: [{x: 1, y:2}, {x: 2, y: 2}, {x: -1, y: 3}]});
+    });
+
+    it('modifies values over traversed x', function() {
+      var incr = function(x){return x + 1};
+      assert.deepEqual(
+        traverse.mod(data,function (xs) {return xs.map(incr)}),
+        {array: [{x: 1, y:2}, {x: 2, y: 2}, {x: 5, y: 3}]});
+    });
+  });
+
   describe('Cursor', function() {
     var data = {deep: {data: 1}};
     var lens = Tscope.attr('deep', 'data')
